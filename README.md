@@ -3,7 +3,7 @@
 Simple implementation of Data Transfer Object (DTO) in Python. 
 
 With Python-DTO you can make Immutable/Mutable (or partially mutable - i.e. attribute level control) DTO classes
-and parse JSON and dictionary to them.
+and parse JSON string and dictionaries to them.
 
 Python-DTO classes support validation of both type and value.
 

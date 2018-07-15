@@ -46,4 +46,4 @@ Notes:
 2. by default DTO object/attributes are immutable. You can change this by adding `{"immutable": False}` 
 to DTO attribute definition tuple.
 3. You can add custom value validator (callable object) to a DTO attribute by adding dictionary key `validator` the DTO attribute 
-definition tuple e.g. `{validator: lambda x: x>0}`.
+definition tuple e.g. `{"validator": lambda x: x>0}`.

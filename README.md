@@ -41,3 +41,9 @@ json_string = '{"salary": null, "middle_name": "kurt", "address": {"city": "scra
 user_dto = UserDTO.from_json(json_string)    
 ```
 
+Notes:
+1. DTO classes attributes can be other DTOs or type object (e.g. int, float, string).
+2. by default DTO object/attributes are immutable. You can change this by adding `{"immutable": False}` 
+to DTO attribute definition tuple.
+3. You can add custom value validator (callable object) to a DTO attribute by adding dictionary key `validator` the DTO attribute 
+definition tuple e.g. `{validator: lambda x: x>0}`.

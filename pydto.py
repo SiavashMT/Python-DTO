@@ -28,7 +28,11 @@ class DTODescriptor:
                                                                                                        instance.__class__.__name__))
 
         if type(self._type) is Union.__class__:
-            matched_types = list(filter(lambda t: isinstance(value, t), self._type.__args__))
+            if hasattr(self._type, '__args__'):
+                union_args = self._type.__args__
+            else:
+                union_args = self._type.__union_params__
+            matched_types = list(filter(lambda t: isinstance(value, t), union_args))
             if not matched_types:
                 raise TypeError("value {} is not of type {}".format(value, self._type))
 

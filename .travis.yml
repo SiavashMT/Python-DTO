@@ -1,0 +1,16 @@
+language: python
+sudo: required
+dist: trusty
+
+python:
+  - 3.5
+
+virtualenv:
+    system_site_package: true
+
+script:
+ - python -m unittest discover
+
+notifications:
+  email:
+    - siavashmalektaji@gmail.com

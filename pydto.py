@@ -18,14 +18,17 @@ class DTODescriptor:
 
     def __get__(self, instance, type):
         if not instance._initialized_dto_descriptors[self._field]:
-            raise AttributeError("Not Initialized")
+            raise AttributeError("Field '{}' of DTO class '{} is not Initialized".format(self._field,
+                                                                                         self._dto_class_name))
         return instance._dto_descriptors_values.get(self._field)
 
-    def __set__(self, instance, value):
+    def _raise_value_not_valied_type(self, value):
+        raise TypeError("Value {} is not of type {} (field '{}' of DTO class '{}')".format(value,
+                                                                                           self._field,
+                                                                                           self._dto_class_name,
+                                                                                           self._type))
 
-        if self._immutable and instance._initialized_dto_descriptors[self._field]:
-            raise AttributeError("Immutable attribute '{}' of DTO class '{}' cannot be changed".format(self._field,
-                                                                                                       instance.__class__.__name__))
+    def _check_type(self, value):
 
         if type(self._type) is Union.__class__:
             if hasattr(self._type, '__args__'):
@@ -34,30 +37,37 @@ class DTODescriptor:
                 union_args = self._type.__union_params__
             matched_types = list(filter(lambda t: isinstance(value, t), union_args))
             if not matched_types:
-                raise TypeError("value {} is not of type {}".format(value, self._type))
+                self._raise_value_not_valied_type(value)
 
             else:
-                _type = matched_types[0]
-                if _type is type(None):
-                    instance._dto_descriptors_values[self._field] = None
-                else:
-                    if self._validator and not self._validator(value):
-                        ValueError(
-                            "{} is not a valid value for the field '{}' or DTO class {} using its validator".format(
-                                value, self._field, self._dto_class_name))
-                    instance._dto_descriptors_values[self._field] = _type(value)
+                return matched_types[0]
 
         else:
             if not isinstance(value, self._type):
-                raise TypeError(
-                    "Value {} is not of type '{}' (DTO class '{}', field '{}')".format(value, self._type.__qualname__,
-                                                                                       instance.__class__.__name__,
-                                                                                       self._field))
-            if self._validator and not self._validator(value):
-                raise ValueError(
-                    "{} is not a valid value field '{}' or DTO class {} using its validator".format(value, self._field,
-                                                                                                    self._dto_class_name))
-            instance._dto_descriptors_values[self._field] = self._type(value)
+                self._raise_value_not_valied_type(value)
+
+        return self._type
+
+    def _check_value(self, value):
+        if self._validator is not None and not self._validator(value):
+            raise ValueError(
+                "{} is not a valid value for the field '{}' or DTO class {} using its validator".format(
+                    value, self._field, self._dto_class_name))
+
+    def __set__(self, instance, value):
+
+        if self._immutable and instance._initialized_dto_descriptors[self._field]:
+            raise AttributeError("Immutable attribute '{}' of DTO class '{}' cannot be changed".format(self._field,
+                                                                                                       instance.__class__.__name__))
+        _type = self._check_type(value)
+
+        if _type is type(None):
+            instance._dto_descriptors_values[self._field] = None
+
+        else:
+            self._check_value(value)
+
+            instance._dto_descriptors_values[self._field] = _type(value)
 
         instance._initialized_dto_descriptors[self._field] = True
 

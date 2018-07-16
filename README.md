@@ -1,5 +1,6 @@
 # Python-DTO
 [![Build Status](https://travis-ci.org/SiavashMT/Python-DTO.svg?branch=master)](https://travis-ci.org/SiavashMT/Python-DTO)
+
 Simple implementation of Data Transfer Object (DTO) in Python. 
 
 With Python-DTO you can make Immutable/Mutable (or partially mutable - i.e. attribute level control) DTO classes

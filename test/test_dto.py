@@ -160,7 +160,7 @@ class TestDataUtil(TestCase):
             first_name = str,
             middle_name = str,
             last_name = str,
-            birth_date = datetime, {"coerce": lambda value: datetime.strptime(value, '%Y-%m-%d')}
+            birth_date = str,
             car = CarDTO,
             address = AddressDTO,
             email = str, {"immutable": False}
@@ -168,7 +168,7 @@ class TestDataUtil(TestCase):
 
         json_string = '{"salary": null, "middle_name": "kurt", "address": {"city": "scranton"}, "first_name": "dwight", ' \
                       '"email": "dshrute@schrutefarms.com", "car": {"license": "4018 JXT", "year": 1987}, ' \
-                      '"last_name": "schrute", "birth_date": "1974-01-20"}'
+                      '"last_name": "schrute", "birth_date": "January 20, 1974"}'
 
         user_dto = UserDTO.from_json(json_string)
 
@@ -189,3 +189,39 @@ class TestDataUtil(TestCase):
         self.assertEqual(dto.date, datetime(year=2011, month=1, day=3))
         self.assertEqual(type(dto.date), datetime)
 
+    def test_partial_dto(self):
+        class SimpleDTO(DTO, partial=True):
+            age = int,
+
+        json_string = '{"age": 25, "date": "2011-01-03"}'
+
+        dto = SimpleDTO.from_json(json_string)
+
+        self.assertEqual(dto.age, 25)
+        self.assertEqual(type(dto.age), int)
+
+    def test_partial_nested_dto(self):
+        class CarDTO(DTO, partial=True):
+            year = int, {"validator": lambda value: value > 1980}
+            license = str,
+
+        class AddressDTO(DTO):
+            city = str,
+
+        class UserDTO(DTO):
+            first_name = str,
+            middle_name = str,
+            last_name = str,
+            birth_date = str,
+            car = CarDTO,
+            address = AddressDTO,
+            email = str, {"immutable": False}
+            salary = Optional[float],
+
+        json_string = '{"salary": null, "middle_name": "kurt", "address": {"city": "scranton"}, "first_name": "dwight", ' \
+                      '"email": "dshrute@schrutefarms.com", "car": {"license": "4018 JXT", "year": 1987, "color": "red"}, ' \
+                      '"last_name": "schrute", "birth_date": "January 20, 1974"}'
+
+        user_dto = UserDTO.from_json(json_string)
+
+        self.assertTrue(True)

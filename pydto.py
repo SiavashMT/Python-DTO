@@ -18,7 +18,7 @@ class DTODescriptor:
 
         if coerce and not callable(coerce):
             raise TypeError("Coerce for field '{}' of DTO class '{}' is not callable".format(field,
-                                                                                                self._dto_class_name))
+                                                                                             self._dto_class_name))
         self._coerce = coerce
 
     def __get__(self, instance, type):
@@ -80,7 +80,10 @@ class DTODescriptor:
 
 class DTOMeta(type):
 
-    def __new__(cls, name, bases, class_dict, immutable: bool = True):
+    def __init__(cls, name, bases, namespace, partial: bool = False):
+        super().__init__(name, bases, namespace)
+
+    def __new__(cls, name, bases, class_dict, partial: bool = False):
 
         descriptors = {k: v for k, v in class_dict.items() if isinstance(v, tuple)}
         _ = [class_dict.pop(k, None) for k in descriptors]
@@ -88,11 +91,13 @@ class DTOMeta(type):
         class_dict['__slots__'] = set(list(descriptors.keys()) + ['_dto_descriptors',
                                                                   '_initialized_dto_descriptors',
                                                                   '_dto_descriptors_values',
-                                                                  '_field_validators'])
+                                                                  '_field_validators',
+                                                                  '_partial'])
 
         new_type = type.__new__(cls, name, bases, class_dict)
         new_type._dto_descriptors = descriptors
         new_type._field_validators = {}
+        new_type._partial = partial
         for attr in new_type._dto_descriptors:
             attr_type = new_type._dto_descriptors[attr][0]
             descriptor_args = {}
@@ -146,12 +151,19 @@ class DTO(metaclass=DTOMeta):
         return obj
 
     def __init__(self, dto_dict: dict):
-        assert set(dto_dict.keys()) == set(self._dto_descriptors.keys()), \
-            "DTO {} fields {} mismatch the dictionary keys {}".format(self.__class__.__qualname__,
-                                                                      list(self._dto_descriptors.keys()),
-                                                                      list(dto_dict.keys()))
-        for k, v in dto_dict.items():
-            setattr(self, k, v)
+        if not self._partial:
+            assert set(dto_dict.keys()) == set(self._dto_descriptors.keys()), \
+                "DTO {} fields {} mismatch the dictionary keys {}".format(self.__class__.__qualname__,
+                                                                          list(self._dto_descriptors.keys()),
+                                                                          list(dto_dict.keys()))
+        else:
+            assert set(self._dto_descriptors.keys()) < set(dto_dict.keys()), \
+                "Partial DTO {} fields {} are missing in the dictionary keys".format(self.__class__.__qualname__,
+                                                                                     set(self._dto_descriptors.keys())
+                                                                                     > set(dto_dict.keys()))
+
+        for k in self._dto_descriptors.keys():
+            setattr(self, k, dto_dict[k])
 
     def to_dict(self):
         dto_dict = {}

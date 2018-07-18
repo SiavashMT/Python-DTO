@@ -13,7 +13,7 @@ Example:
 ```
 from typing import Optional
 from pydto import DTO
-
+from datetime import datetime
 
 class CarDTO(DTO):
     year = int, {"validator": lambda value: value > 1980}
@@ -28,7 +28,7 @@ class UserDTO(DTO):
     first_name = str,
     middle_name = str,
     last_name = str,
-    birth_date = str,
+    birth_date = datetime, {"coerce": lambda value: datetime.strptime(value, '%Y-%m-%d')}
     car = CarDTO,
     address = AddressDTO,
     email = str, {"immutable": False}
@@ -37,7 +37,7 @@ class UserDTO(DTO):
 
 json_string = '{"salary": null, "middle_name": "kurt", "address": {"city": "scranton"}, "first_name": "dwight", ' \
               '"email": "dshrute@schrutefarms.com", "car": {"license": "4018 JXT", "year": 1987}, ' \
-              '"last_name": "schrute", "birth_date": "January 20, 1974"}'
+              '"last_name": "schrute", "birth_date": "1974-01-20"}'
 
 user_dto = UserDTO.from_json(json_string)    
 ```

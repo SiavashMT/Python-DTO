@@ -3,10 +3,10 @@ from typing import Union
 
 
 class DTODescriptor:
-    __slots__ = "_immutable", "_type", "_field", "_validator", "_dto_class_name"
+    __slots__ = "_immutable", "_type", "_field", "_validator", "_dto_class_name", "_coerce"
 
     def __init__(self, dto_class_name: str, field: str, type_: type, immutable: bool = True,
-                 validator: callable = None):
+                 validator: callable = None, coerce: callable = None):
         self._dto_class_name = dto_class_name
         self._field = field
         self._type = type_
@@ -15,6 +15,11 @@ class DTODescriptor:
             raise TypeError("Validator for field '{}' of DTO class '{}' is not callable".format(field,
                                                                                                 self._dto_class_name))
         self._validator = validator
+
+        if coerce and not callable(coerce):
+            raise TypeError("Coerce for field '{}' of DTO class '{}' is not callable".format(field,
+                                                                                                self._dto_class_name))
+        self._coerce = coerce
 
     def __get__(self, instance, type):
         if not instance._initialized_dto_descriptors[self._field]:
@@ -55,6 +60,8 @@ class DTODescriptor:
                     value, self._field, self._dto_class_name))
 
     def __set__(self, instance, value):
+        if self._coerce:
+            value = self._coerce(value)
 
         if self._immutable and instance._initialized_dto_descriptors[self._field]:
             raise AttributeError("Immutable attribute '{}' of DTO class '{}' cannot be changed".format(self._field,
@@ -66,8 +73,7 @@ class DTODescriptor:
 
         else:
             self._check_value(value)
-
-            instance._dto_descriptors_values[self._field] = _type(value)
+            instance._dto_descriptors_values[self._field] = value
 
         instance._initialized_dto_descriptors[self._field] = True
 

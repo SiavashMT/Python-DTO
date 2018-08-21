@@ -93,7 +93,7 @@ class TestDataUtil(TestCase):
 
         self.assertEqual(type(simple_dto.attribute), float)
 
-    def test_dto_simple_class_dictionary_mistmatch(self):
+    def test_dto_simple_class_dictionary_mismatch(self):
         class SimpleDTO(DTO):
             attribute1 = float,
             attribute2 = int,
@@ -166,7 +166,8 @@ class TestDataUtil(TestCase):
             email = str, {"immutable": False}
             salary = Optional[float],
 
-        json_string = '{"salary": null, "middle_name": "kurt", "address": {"city": "scranton"}, "first_name": "dwight", ' \
+        json_string = '{"salary": null, "middle_name": "kurt", "address": {"city": "scranton"}, ' \
+                      '"first_name": "dwight", ' \
                       '"email": "dshrute@schrutefarms.com", "car": {"license": "4018 JXT", "year": 1987}, ' \
                       '"last_name": "schrute", "birth_date": "January 20, 1974"}'
 
@@ -218,8 +219,10 @@ class TestDataUtil(TestCase):
             email = str, {"immutable": False}
             salary = Optional[float],
 
-        json_string = '{"salary": null, "middle_name": "kurt", "address": {"city": "scranton"}, "first_name": "dwight", ' \
-                      '"email": "dshrute@schrutefarms.com", "car": {"license": "4018 JXT", "year": 1987, "color": "red"}, ' \
+        json_string = '{"salary": null, "middle_name": "kurt", "address": {"city": "scranton"}, ' \
+                      '"first_name": "dwight", ' \
+                      '"email": "dshrute@schrutefarms.com", "car": {"license": "4018 JXT", "year": 1987, ' \
+                      '"color": "red"}, ' \
                       '"last_name": "schrute", "birth_date": "1974-01-20"}'
 
         user_dto = UserDTO.from_json(json_string)

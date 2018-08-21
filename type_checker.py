@@ -4,10 +4,10 @@ import pydto
 
 
 def _raise_value_not_valid_type(dto_descriptor, value):
-    raise TypeError("Value {} is not of type {} (field '{}' of DTO class '{}')".format(value,
-                                                                                       dto_descriptor._field,
-                                                                                       dto_descriptor._dto_class_name,
-                                                                                       dto_descriptor._type))
+    raise TypeError("Value '{}' is not of type '{}' (field '{}' of DTO class '{}')".format(value,
+                                                                                           dto_descriptor._type,
+                                                                                           dto_descriptor._field,
+                                                                                           dto_descriptor._dto_class_name))
 
 
 def _check_type_dto_descriptor(dto_descriptor, value):
@@ -20,7 +20,7 @@ def _check_type_dto_descriptor(dto_descriptor, value):
 
 def _check_type(type_, value):
     if type(type_) is Union.__class__:
-        _check_type_Union(type_, value)
+        return _check_type_Union(type_, value)
 
     elif type_ in [str, float, int, bool, complex, dict, datetime.datetime]:
         if not isinstance(value, type_):
@@ -57,13 +57,21 @@ def _check_type_Union(type_, value):
     return matched_types[0]
 
 
-def _check_type_Dict(dto_descriptor, value):
+def _check_type_Dict(type_, value):
 
     if not isinstance(value, dict):
-        _raise_value_not_valid_type(dto_descriptor, value)
+        raise TypeError
 
-    key_type, value_type = getattr(dto_descriptor._type, "__args__", dto_descriptor._type.__parameters__)
+    key_value_types = getattr(type_, "__args__", type_.__parameters__)
 
-    for k, v in value.items():
-        _check_type(key_type, v)
-        _check_type(value_type, k)
+    if key_value_types is not None:
+        key_type, value_type = key_value_types
+
+        for k, v in value.items():
+            _ = _check_type(key_type, v)
+            _ = _check_type(value_type, k)
+
+        return type_
+
+    else:
+        return type_

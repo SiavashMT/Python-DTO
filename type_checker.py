@@ -59,7 +59,7 @@ def _check_type_Union(type_, value):
         union_args = type_.__union_params__
 
     # Requires Python 3.5.4+ otherwise https://github.com/python/typing/issues/477
-    matched_types = list(filter(lambda t: isinstance(value, t), union_args))
+    matched_types = list(filter(lambda t: issubclass(value.__class__, t), union_args))
     if not matched_types:
         raise TypeError
 

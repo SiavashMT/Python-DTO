@@ -4,6 +4,9 @@ dist: trusty
 
 python:
   - 3.6
+  - 3.5.2
+  - 3.5.3
+  - 3.5.4
 
 virtualenv:
     system_site_package: true

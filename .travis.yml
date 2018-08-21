@@ -3,7 +3,7 @@ sudo: required
 dist: trusty
 
 python:
-  - 3.5
+  - 3.5.4
 
 virtualenv:
     system_site_package: true

@@ -38,9 +38,17 @@ def _check_type(type_, value):
     elif issubclass(type_, List):
         _check_type_List(type_, value)
 
+    elif issubclass(type_, None.__class__):
+        _check_type_None(type_, value)
+
     else:
         raise NotImplementedError("Type checker for type {} is not implemented".format(type_))
 
+
+def _check_type_None(type_, value):
+    if value is not None:
+        raise TypeError
+    return type_
 
 def _check_type_Union(type_, value):
     if hasattr(type_, '__args__'):
@@ -57,7 +65,7 @@ def _check_type_Union(type_, value):
     assert len(
         matched_types) == 1, "Value {} matches multiple subtype of type {}".format(value, type_)
 
-    return matched_types[0]
+    return _check_type(matched_types[0], value)
 
 
 def _check_type_Dict(type_, value):

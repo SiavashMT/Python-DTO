@@ -371,3 +371,20 @@ class TestDataUtil(TestCase):
             simple_dto = SimpleDTO.from_json(json_string)
 
         self.assertTrue(True)
+
+    def test_dto_with_optional_List_field(self):
+        class SimpleDTO(DTO):
+            city = Optional[List[int]],
+
+        json_string = '{"city": []}'
+
+        simple_dto = SimpleDTO.from_json(json_string)
+
+        json_string = '{"city": [1, 2]}'
+
+        simple_dto = SimpleDTO.from_json(json_string)
+
+        json_string = '{"city": [1, "1"]}'
+
+        with self.assertRaises(TypeError):
+            simple_dto = SimpleDTO.from_json(json_string)

@@ -22,7 +22,7 @@ def _check_type(type_, value):
     if type(type_) is Union.__class__:
         return _check_type_Union(type_, value)
 
-    elif type_ in [str, float, int, bool, complex, dict, datetime.datetime]:
+    elif type_ in [str, float, int, bool, complex, dict, list, datetime.datetime]:
         if not isinstance(value, type_):
             raise TypeError
         return type_
@@ -32,8 +32,11 @@ def _check_type(type_, value):
             raise TypeError
         return type_
 
-    elif type(type_) is Dict.__class__:
+    elif issubclass(type_, Dict):
         _check_type_Dict(type_, value)
+
+    elif issubclass(type_, List):
+        _check_type_List(type_, value)
 
     else:
         raise NotImplementedError("Type checker for type {} is not implemented".format(type_))
@@ -70,6 +73,23 @@ def _check_type_Dict(type_, value):
         for k, v in value.items():
             _ = _check_type(key_type, v)
             _ = _check_type(value_type, k)
+
+        return type_
+
+    else:
+        return type_
+
+
+def _check_type_List(type_, value):
+
+    if not isinstance(value, list):
+        raise TypeError
+
+    value_type = getattr(type_, "__args__", type_.__parameters__)[0]
+
+    if value_type is not None:
+        for v in value:
+            _ = _check_type(value_type, v)
 
         return type_
 

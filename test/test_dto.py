@@ -1,6 +1,6 @@
 from unittest import TestCase
 from pydto import DTO
-from typing import Optional, Dict
+from typing import Optional, Dict, List
 from datetime import datetime
 
 
@@ -308,5 +308,66 @@ class TestDataUtil(TestCase):
         json_string = '{"city": {"1": "2"}}'
 
         simple_dto = SimpleDTO.from_json(json_string)
+
+        self.assertTrue(True)
+
+    def test_dto_with_list_field(self):
+        class SimpleDTO(DTO):
+            city = list,
+
+        json_string = '{"city": []}'
+
+        simple_dto = SimpleDTO.from_json(json_string)
+
+        json_string = '{"city": [1, "1"]}'
+
+        simple_dto = SimpleDTO.from_json(json_string)
+
+        json_string = '{"city": null}'
+
+        with self.assertRaises(TypeError):
+            simple_dto = SimpleDTO.from_json(json_string)
+
+        json_string = '{"city": "1"}'
+
+        with self.assertRaises(TypeError):
+            simple_dto = SimpleDTO.from_json(json_string)
+
+        json_string = '{"city": {"1": 2}}'
+
+        with self.assertRaises(TypeError):
+            simple_dto = SimpleDTO.from_json(json_string)
+
+        self.assertTrue(True)
+
+    def test_dto_with_List_field(self):
+        class SimpleDTO(DTO):
+            city = List[int],
+
+        json_string = '{"city": []}'
+
+        simple_dto = SimpleDTO.from_json(json_string)
+
+        json_string = '{"city": [1, 2]}'
+
+        simple_dto = SimpleDTO.from_json(json_string)
+
+        json_string = '{"city": [1, "1"]}'
+
+        with self.assertRaises(TypeError):
+            simple_dto = SimpleDTO.from_json(json_string)
+
+        with self.assertRaises(TypeError):
+            simple_dto = SimpleDTO.from_json(json_string)
+
+        json_string = '{"city": "1"}'
+
+        with self.assertRaises(TypeError):
+            simple_dto = SimpleDTO.from_json(json_string)
+
+        json_string = '{"city": {"1": 2}}'
+
+        with self.assertRaises(TypeError):
+            simple_dto = SimpleDTO.from_json(json_string)
 
         self.assertTrue(True)

@@ -33,13 +33,13 @@ def _check_type(type_, value):
         return type_
 
     elif issubclass(type_, Dict):
-        _check_type_Dict(type_, value)
+        return _check_type_Dict(type_, value)
 
     elif issubclass(type_, List):
-        _check_type_List(type_, value)
+        return _check_type_List(type_, value)
 
     elif issubclass(type_, None.__class__):
-        _check_type_None(type_, value)
+        return _check_type_None(type_, value)
 
     else:
         raise NotImplementedError("Type checker for type {} is not implemented".format(type_))

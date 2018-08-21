@@ -225,3 +225,32 @@ class TestDataUtil(TestCase):
         user_dto = UserDTO.from_json(json_string)
 
         self.assertTrue(True)
+
+    def test_dto_with_dict_field(self):
+        class SimpleDTO(DTO):
+            city = dict,
+
+        json_string = '{"city": null}'
+
+        with self.assertRaises(TypeError):
+            simple_dto = SimpleDTO.from_json(json_string)
+
+        json_string = '{"city": 1}'
+
+        with self.assertRaises(TypeError):
+            simple_dto = SimpleDTO.from_json(json_string)
+
+        json_string = '{"city": 1.0}'
+
+        with self.assertRaises(TypeError):
+            simple_dto = SimpleDTO.from_json(json_string)
+
+        json_string = '{"city": []}'
+
+        with self.assertRaises(TypeError):
+            simple_dto = SimpleDTO.from_json(json_string)
+
+        json_string = '{"city": [1]}'
+
+        with self.assertRaises(TypeError):
+            simple_dto = SimpleDTO.from_json(json_string)

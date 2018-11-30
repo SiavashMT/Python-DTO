@@ -84,6 +84,21 @@ class DTOMeta(type):
         if type(inst) == type(self):
             return True
         if isinstance(inst, dict):
+            # Comparing a dictionary and a DTO
+            if not self._partial:
+                if len(inst.keys()) != len(self._dto_descriptors.keys()):
+                    return False
+                for k, v in inst.items():
+                    try:
+                        type_checker._check_type(self._dto_descriptors[k][0], v)
+                    except TypeError:
+                        return False
+            else:
+                for k in self._dto_descriptors.keys():
+                    try:
+                        type_checker._check_type(self._dto_descriptors[k][0], inst[k])
+                    except TypeError:
+                        return False
             return True
         return False
 
@@ -137,6 +152,7 @@ class DTO(metaclass=DTOMeta):
                                                                                      > set(dto_dict.keys()))
 
         for k in self._dto_descriptors.keys():
+
             setattr(self, k, dto_dict[k])
 
     def to_dict(self):
@@ -149,7 +165,7 @@ class DTO(metaclass=DTOMeta):
         return dto_dict
 
     def __str__(self):
-        return str(self._dto_descriptors_values)
+        return '{}({})'.format(self.__class__.__qualname__, str(self._dto_descriptors_values))
 
     def __repr__(self):
         return str(self)

@@ -1,4 +1,6 @@
 import json
+from typing import Union
+
 import type_checker
 
 
@@ -21,9 +23,9 @@ class DTODescriptor:
                                                                                              self._dto_class_name))
         self._coerce = coerce
 
-    def __get__(self, instance, type):
+    def __get__(self, instance, owner):
         if not instance._initialized_dto_descriptors[self._field]:
-            raise AttributeError("Field '{}' of DTO class '{} is not Initialized".format(self._field,
+            raise AttributeError("Field '{}' of DTO class '{} is not initialized".format(self._field,
                                                                                          self._dto_class_name))
         return instance._dto_descriptors_values.get(self._field)
 
@@ -33,13 +35,14 @@ class DTODescriptor:
                 "{} is not a valid value for the field '{}' or DTO class {} using its validator".format(
                     value, self._field, self._dto_class_name))
 
-    def __set__(self, instance, value):
+    def __set__(self, instance: 'DTO', value):
         if self._coerce:
             value = self._coerce(value)
 
         if self._immutable and instance._initialized_dto_descriptors[self._field]:
-            raise AttributeError("Immutable attribute '{}' of DTO class '{}' cannot be changed".format(self._field,
-                                                                                                       instance.__class__.__name__))
+            raise AttributeError("Immutable attribute '{}' of DTO class '{}' cannot be changed".
+                                 format(self._field, instance.__class__.__name__))
+
         _type = type_checker._check_type_dto_descriptor(self, value)
 
         if _type is type(None):
@@ -80,7 +83,7 @@ class DTOMeta(type):
             setattr(new_type, attr, DTODescriptor(dto_class_name=name, field=attr, type_=attr_type, **descriptor_args))
         return new_type
 
-    def __instancecheck__(self, inst):
+    def __instancecheck__(self, inst: Union['DTO', dict]):
         if type(inst) == type(self):
             return True
         if isinstance(inst, dict):
@@ -152,7 +155,6 @@ class DTO(metaclass=DTOMeta):
                                                                                      > set(dto_dict.keys()))
 
         for k in self._dto_descriptors.keys():
-
             setattr(self, k, dto_dict[k])
 
     def to_dict(self):

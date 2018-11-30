@@ -1,4 +1,4 @@
-# Python-DTO [Currently only working on Python 3.5.2]
+# Python-DTO
 [![Build Status](https://travis-ci.org/SiavashMT/Python-DTO.svg?branch=master)](https://travis-ci.org/SiavashMT/Python-DTO)
 
 Simple implementation of Data Transfer Object (DTO) in Python. 

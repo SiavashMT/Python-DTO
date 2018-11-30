@@ -391,7 +391,6 @@ class TestDTO(TestCase):
 
         simple_dto = SimpleDTO.from_json(json_string)
 
-
     def test_dto_with_optional_nested_type_field(self):
         class SimpleDTO(DTO):
             city = Optional[List[int]],
@@ -401,5 +400,39 @@ class TestDTO(TestCase):
         simple_dto = SimpleDTO.from_json(json_string)
 
         json_string = '{"city": [1, 2]}'
+
+        simple_dto = SimpleDTO.from_json(json_string)
+
+    def test_do_with_nested_type_field(self):
+        class SimpleDTO(DTO):
+            city = Optional[List[List[Optional[int]]]],
+
+        json_string = '{"city": null}'
+
+        simple_dto = SimpleDTO.from_json(json_string)
+
+        json_string = '{"city": []}'
+
+        simple_dto = SimpleDTO.from_json(json_string)
+
+        json_string = '{"city": [1]}'
+
+        with self.assertRaises(TypeError):
+            simple_dto = SimpleDTO.from_json(json_string)
+
+        json_string = '{"city": [[]]}'
+
+        simple_dto = SimpleDTO.from_json(json_string)
+
+        json_string = '{"city": [[1]]}'
+
+        simple_dto = SimpleDTO.from_json(json_string)
+
+        json_string = '{"city": [[1.0]]}'
+
+        with self.assertRaises(TypeError):
+            simple_dto = SimpleDTO.from_json(json_string)
+
+        json_string = '{"city": [[null]]}'
 
         simple_dto = SimpleDTO.from_json(json_string)

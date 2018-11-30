@@ -50,6 +50,7 @@ def _check_type_None(type_, value):
         raise TypeError
     return type_
 
+
 def _check_type_Union(type_, value):
     if hasattr(type_, '__args__'):
         # Python 3.6+
@@ -58,8 +59,15 @@ def _check_type_Union(type_, value):
         # Python 3.5
         union_args = type_.__union_params__
 
-    # isinstance cause https://github.com/python/typing/issues/477.tested with python 3.5.4 and 3.6
-    matched_types = list(filter(lambda t: isinstance(value, t), union_args))
+    matched_types = []
+    for arg in union_args:
+        try:
+            arg = _check_type(arg, value)
+        except TypeError:
+            pass
+        else:
+            matched_types.append(arg)
+
     if not matched_types:
         raise TypeError
 
@@ -70,7 +78,6 @@ def _check_type_Union(type_, value):
 
 
 def _check_type_Dict(type_, value):
-
     if not isinstance(value, dict):
         raise TypeError
 
@@ -90,7 +97,6 @@ def _check_type_Dict(type_, value):
 
 
 def _check_type_List(type_, value):
-
     if not isinstance(value, list):
         raise TypeError
 
@@ -99,6 +105,9 @@ def _check_type_List(type_, value):
         value_type = value_type[0]
 
     if value_type is not None:
+        # If a list has a subtype but the list is empty should it be treated as type error?!
+        # if len(value) == 0:
+        #     raise TypeError
         for v in value:
             _ = _check_type(value_type, v)
 

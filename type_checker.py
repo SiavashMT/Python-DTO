@@ -3,19 +3,19 @@ from typing import Union, Dict, List
 import pydto
 
 
-def _raise_value_not_valid_type(dto_descriptor, value):
+def _raise_value_not_valid_type(dto_descriptor, value, e):
     raise TypeError("Value '{}' is not of type '{}' (field '{}' of DTO class '{}')".format(value,
                                                                                            dto_descriptor._type,
                                                                                            dto_descriptor._field,
-                                                                                           dto_descriptor._dto_class_name))
+                                                                                           dto_descriptor._dto_class_name)) from e
 
 
 def _check_type_dto_descriptor(dto_descriptor, value):
     try:
         inferred_type = _check_type(dto_descriptor._type, value)
         return inferred_type
-    except TypeError:
-        _raise_value_not_valid_type(dto_descriptor, value)
+    except TypeError as e:
+        _raise_value_not_valid_type(dto_descriptor, value, e)
 
 
 def _check_type(type_, value):
@@ -24,12 +24,12 @@ def _check_type(type_, value):
 
     elif type_ in [str, float, int, bool, complex, dict, list, datetime.datetime]:
         if not isinstance(value, type_):
-            raise TypeError
+            raise TypeError('Value {} is not of type {}'.format(value, type_))
         return type_
 
     elif isinstance(type_, pydto.DTO):
         if not isinstance(value, type_):
-            raise TypeError
+            raise TypeError('Value {} is not of type {}'.format(value, type_))
         return type_
 
     elif issubclass(type_, Dict):
@@ -47,7 +47,7 @@ def _check_type(type_, value):
 
 def _check_type_None(type_, value):
     if value is not None:
-        raise TypeError
+        raise TypeError('Value {} is not of type {}'.format(value, type_))
     return type_
 
 
@@ -98,7 +98,7 @@ def _check_type_Dict(type_, value):
 
 def _check_type_List(type_, value):
     if not isinstance(value, list):
-        raise TypeError
+        raise TypeError('Value {} is not of type {}'.format(value, type_))
 
     value_type = getattr(type_, "__args__", type_.__parameters__)
     if value_type is not None:

@@ -126,15 +126,7 @@ class DTO(metaclass=DTOMeta):
         return cls.from_dict(dict_)
 
     def __setattr__(self, attr, val):
-        try:
-            obj = object.__getattribute__(self, attr)
-        except AttributeError:
-            object.__setattr__(self, attr, val)
-        else:
-            if hasattr(obj, '__set__'):
-                obj.__set__(self, val)
-            else:
-                object.__setattr__(self, attr, val)
+        object.__setattr__(self, attr, val)
 
     def __getattribute__(self, attr):
         obj = object.__getattribute__(self, attr)

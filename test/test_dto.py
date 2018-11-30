@@ -444,26 +444,34 @@ class TestDTO(TestCase):
 
     def test_do_with_nested_type_with_DTO_field(self):
 
-        class SimpleDTO1(DTO):
+        class SimpleDTO1(DTO, partial=True):
             country = str,
 
         class SimpleDTO2(DTO):
             city = List[SimpleDTO1],
 
-        # json_string = '{"city": null}'
-        #
-        # simple_dto = SimpleDTO2.from_json(json_string)
-        #
-        # json_string = '{"city": [[null]]}'
-        #
-        # simple_dto = SimpleDTO2.from_json(json_string)
-        #
-        # json_string = '{"city": [[{"country": "canada"}]]}'
-        #
-        # simple_dto = SimpleDTO2.from_json(json_string)
+        json_string = '{"city": []}'
+
+        simple_dto = SimpleDTO2.from_json(json_string)
 
         json_string = '{"city": [{"country": "canada"}]}'
 
         simple_dto = SimpleDTO2.from_json(json_string)
 
-        print(simple_dto)
+        json_string = '{"city": [{"country": "canada", "province": "alberta"}]}'
+
+        simple_dto = SimpleDTO2.from_json(json_string)
+
+        json_string = '{"city": [{"province": "alberta"}]}'
+
+        with self.assertRaises(TypeError):
+            simple_dto = SimpleDTO2.from_json(json_string)
+
+        json_string = '{"city": [{"country": 1}]}'
+
+        with self.assertRaises(TypeError):
+            simple_dto = SimpleDTO2.from_json(json_string)
+
+
+
+

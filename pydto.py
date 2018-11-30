@@ -97,7 +97,7 @@ class DTOMeta(type):
                 for k in self._dto_descriptors.keys():
                     try:
                         type_checker._check_type(self._dto_descriptors[k][0], inst[k])
-                    except TypeError:
+                    except (TypeError, KeyError):
                         return False
             return True
         return False

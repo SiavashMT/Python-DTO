@@ -1,5 +1,5 @@
 import json
-from typing import Union
+import type_checker
 
 
 class DTODescriptor:
@@ -27,32 +27,6 @@ class DTODescriptor:
                                                                                          self._dto_class_name))
         return instance._dto_descriptors_values.get(self._field)
 
-    def _raise_value_not_valied_type(self, value):
-        raise TypeError("Value {} is not of type {} (field '{}' of DTO class '{}')".format(value,
-                                                                                           self._field,
-                                                                                           self._dto_class_name,
-                                                                                           self._type))
-
-    def _check_type(self, value):
-
-        if type(self._type) is Union.__class__:
-            if hasattr(self._type, '__args__'):
-                union_args = self._type.__args__
-            else:
-                union_args = self._type.__union_params__
-            matched_types = list(filter(lambda t: isinstance(value, t), union_args))
-            if not matched_types:
-                self._raise_value_not_valied_type(value)
-
-            else:
-                return matched_types[0]
-
-        else:
-            if not isinstance(value, self._type):
-                self._raise_value_not_valied_type(value)
-
-        return self._type
-
     def _check_value(self, value):
         if self._validator is not None and not self._validator(value):
             raise ValueError(
@@ -66,7 +40,7 @@ class DTODescriptor:
         if self._immutable and instance._initialized_dto_descriptors[self._field]:
             raise AttributeError("Immutable attribute '{}' of DTO class '{}' cannot be changed".format(self._field,
                                                                                                        instance.__class__.__name__))
-        _type = self._check_type(value)
+        _type = type_checker._check_type_dto_descriptor(self, value)
 
         if _type is type(None):
             instance._dto_descriptors_values[self._field] = None
@@ -110,6 +84,21 @@ class DTOMeta(type):
         if type(inst) == type(self):
             return True
         if isinstance(inst, dict):
+            # Comparing a dictionary and a DTO
+            if not self._partial:
+                if len(inst.keys()) != len(self._dto_descriptors.keys()):
+                    return False
+                for k, v in inst.items():
+                    try:
+                        type_checker._check_type(self._dto_descriptors[k][0], v)
+                    except TypeError:
+                        return False
+            else:
+                for k in self._dto_descriptors.keys():
+                    try:
+                        type_checker._check_type(self._dto_descriptors[k][0], inst[k])
+                    except (TypeError, KeyError):
+                        return False
             return True
         return False
 
@@ -163,6 +152,7 @@ class DTO(metaclass=DTOMeta):
                                                                                      > set(dto_dict.keys()))
 
         for k in self._dto_descriptors.keys():
+
             setattr(self, k, dto_dict[k])
 
     def to_dict(self):
@@ -175,7 +165,7 @@ class DTO(metaclass=DTOMeta):
         return dto_dict
 
     def __str__(self):
-        return str(self._dto_descriptors_values)
+        return '{}({})'.format(self.__class__.__qualname__, str(self._dto_descriptors_values))
 
     def __repr__(self):
         return str(self)

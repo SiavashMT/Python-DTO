@@ -1,10 +1,10 @@
 from unittest import TestCase
 from pydto import DTO
-from typing import Optional
+from typing import Optional, Dict, List
 from datetime import datetime
 
 
-class TestDataUtil(TestCase):
+class TestDTO(TestCase):
     def test_dto_simple_class(self):
         class SimpleDTO(DTO):
             attribute = int,
@@ -93,7 +93,7 @@ class TestDataUtil(TestCase):
 
         self.assertEqual(type(simple_dto.attribute), float)
 
-    def test_dto_simple_class_dictionary_mistmatch(self):
+    def test_dto_simple_class_dictionary_mismatch(self):
         class SimpleDTO(DTO):
             attribute1 = float,
             attribute2 = int,
@@ -166,7 +166,8 @@ class TestDataUtil(TestCase):
             email = str, {"immutable": False}
             salary = Optional[float],
 
-        json_string = '{"salary": null, "middle_name": "kurt", "address": {"city": "scranton"}, "first_name": "dwight", ' \
+        json_string = '{"salary": null, "middle_name": "kurt", "address": {"city": "scranton"}, ' \
+                      '"first_name": "dwight", ' \
                       '"email": "dshrute@schrutefarms.com", "car": {"license": "4018 JXT", "year": 1987}, ' \
                       '"last_name": "schrute", "birth_date": "January 20, 1974"}'
 
@@ -218,10 +219,259 @@ class TestDataUtil(TestCase):
             email = str, {"immutable": False}
             salary = Optional[float],
 
-        json_string = '{"salary": null, "middle_name": "kurt", "address": {"city": "scranton"}, "first_name": "dwight", ' \
-                      '"email": "dshrute@schrutefarms.com", "car": {"license": "4018 JXT", "year": 1987, "color": "red"}, ' \
+        json_string = '{"salary": null, "middle_name": "kurt", "address": {"city": "scranton"}, ' \
+                      '"first_name": "dwight", ' \
+                      '"email": "dshrute@schrutefarms.com", "car": {"license": "4018 JXT", "year": 1987, ' \
+                      '"color": "red"}, ' \
                       '"last_name": "schrute", "birth_date": "1974-01-20"}'
 
         user_dto = UserDTO.from_json(json_string)
 
         self.assertTrue(True)
+
+    def test_dto_with_dict_field(self):
+        class SimpleDTO(DTO):
+            city = dict,
+
+        json_string = '{"city": null}'
+
+        with self.assertRaises(TypeError):
+            simple_dto = SimpleDTO.from_json(json_string)
+
+        json_string = '{"city": 1}'
+
+        with self.assertRaises(TypeError):
+            simple_dto = SimpleDTO.from_json(json_string)
+
+        json_string = '{"city": 1.0}'
+
+        with self.assertRaises(TypeError):
+            simple_dto = SimpleDTO.from_json(json_string)
+
+        json_string = '{"city": []}'
+
+        with self.assertRaises(TypeError):
+            simple_dto = SimpleDTO.from_json(json_string)
+
+        json_string = '{"city": [1]}'
+
+        with self.assertRaises(TypeError):
+            simple_dto = SimpleDTO.from_json(json_string)
+
+        json_string = '{"city": {}}'
+
+        simple_dto = SimpleDTO.from_json(json_string)
+
+        self.assertTrue(True)
+
+    def test_dto_with_Dict_field(self):
+        class SimpleDTO(DTO):
+            city = Dict[str, str],
+
+        json_string = '{"city": null}'
+
+        with self.assertRaises(TypeError):
+            simple_dto = SimpleDTO.from_json(json_string)
+
+        json_string = '{"city": 1}'
+
+        with self.assertRaises(TypeError):
+            simple_dto = SimpleDTO.from_json(json_string)
+
+        json_string = '{"city": 1.0}'
+
+        with self.assertRaises(TypeError):
+            simple_dto = SimpleDTO.from_json(json_string)
+
+        json_string = '{"city": []}'
+
+        with self.assertRaises(TypeError):
+            simple_dto = SimpleDTO.from_json(json_string)
+
+        json_string = '{"city": [1]}'
+
+        with self.assertRaises(TypeError):
+            simple_dto = SimpleDTO.from_json(json_string)
+
+        json_string = '{"city": {"1": 2}}'
+
+        with self.assertRaises(TypeError):
+            simple_dto = SimpleDTO.from_json(json_string)
+
+        json_string = '{"city": {"1": "2"}}'
+
+        simple_dto = SimpleDTO.from_json(json_string)
+
+        self.assertTrue(True)
+
+    def test_dto_with_Dict_field_with_no_subtype(self):
+        class SimpleDTO(DTO):
+            city = Dict,
+
+        json_string = '{"city": {"1": "2"}}'
+
+        simple_dto = SimpleDTO.from_json(json_string)
+
+        self.assertTrue(True)
+
+    def test_dto_with_list_field(self):
+        class SimpleDTO(DTO):
+            city = list,
+
+        json_string = '{"city": []}'
+
+        simple_dto = SimpleDTO.from_json(json_string)
+
+        json_string = '{"city": [1, "1"]}'
+
+        simple_dto = SimpleDTO.from_json(json_string)
+
+        json_string = '{"city": null}'
+
+        with self.assertRaises(TypeError):
+            simple_dto = SimpleDTO.from_json(json_string)
+
+        json_string = '{"city": "1"}'
+
+        with self.assertRaises(TypeError):
+            simple_dto = SimpleDTO.from_json(json_string)
+
+        json_string = '{"city": {"1": 2}}'
+
+        with self.assertRaises(TypeError):
+            simple_dto = SimpleDTO.from_json(json_string)
+
+        self.assertTrue(True)
+
+    def test_dto_with_List_field(self):
+        class SimpleDTO(DTO):
+            city = List[int],
+
+        json_string = '{"city": []}'
+
+        simple_dto = SimpleDTO.from_json(json_string)
+
+        json_string = '{"city": [1, 2]}'
+
+        simple_dto = SimpleDTO.from_json(json_string)
+
+        json_string = '{"city": [1, "1"]}'
+
+        with self.assertRaises(TypeError):
+            simple_dto = SimpleDTO.from_json(json_string)
+
+        with self.assertRaises(TypeError):
+            simple_dto = SimpleDTO.from_json(json_string)
+
+        json_string = '{"city": "1"}'
+
+        with self.assertRaises(TypeError):
+            simple_dto = SimpleDTO.from_json(json_string)
+
+        json_string = '{"city": {"1": 2}}'
+
+        with self.assertRaises(TypeError):
+            simple_dto = SimpleDTO.from_json(json_string)
+
+        self.assertTrue(True)
+
+    def test_dto_with_optional_List_field(self):
+        class SimpleDTO(DTO):
+            city = Optional[List],
+
+        json_string = '{"city": []}'
+
+        simple_dto = SimpleDTO.from_json(json_string)
+
+        json_string = '{"city": [1, 2]}'
+
+        simple_dto = SimpleDTO.from_json(json_string)
+
+        json_string = '{"city": [1, "1"]}'
+
+        simple_dto = SimpleDTO.from_json(json_string)
+
+    def test_dto_with_optional_nested_type_field(self):
+        class SimpleDTO(DTO):
+            city = Optional[List[int]],
+
+        json_string = '{"city": []}'
+
+        simple_dto = SimpleDTO.from_json(json_string)
+
+        json_string = '{"city": [1, 2]}'
+
+        simple_dto = SimpleDTO.from_json(json_string)
+
+    def test_do_with_nested_type_field(self):
+        class SimpleDTO(DTO):
+            city = Optional[List[List[Optional[int]]]],
+
+        json_string = '{"city": null}'
+
+        simple_dto = SimpleDTO.from_json(json_string)
+
+        json_string = '{"city": []}'
+
+        simple_dto = SimpleDTO.from_json(json_string)
+
+        json_string = '{"city": [1]}'
+
+        with self.assertRaises(TypeError):
+            simple_dto = SimpleDTO.from_json(json_string)
+
+        json_string = '{"city": [{}]}'
+
+        with self.assertRaises(TypeError):
+            simple_dto = SimpleDTO.from_json(json_string)
+
+        json_string = '{"city": [[]]}'
+
+        simple_dto = SimpleDTO.from_json(json_string)
+
+        json_string = '{"city": [[1]]}'
+
+        simple_dto = SimpleDTO.from_json(json_string)
+
+        json_string = '{"city": [[1.0]]}'
+
+        with self.assertRaises(TypeError):
+            simple_dto = SimpleDTO.from_json(json_string)
+
+        json_string = '{"city": [[null]]}'
+
+        simple_dto = SimpleDTO.from_json(json_string)
+
+    def test_do_with_nested_type_with_DTO_field(self):
+
+        class SimpleDTO1(DTO, partial=True):
+            country = str,
+
+        class SimpleDTO2(DTO):
+            city = List[SimpleDTO1],
+
+        json_string = '{"city": []}'
+
+        simple_dto = SimpleDTO2.from_json(json_string)
+
+        json_string = '{"city": [{"country": "canada"}]}'
+
+        simple_dto = SimpleDTO2.from_json(json_string)
+
+        json_string = '{"city": [{"country": "canada", "province": "alberta"}]}'
+
+        simple_dto = SimpleDTO2.from_json(json_string)
+
+        json_string = '{"city": [{"province": "alberta"}]}'
+
+        with self.assertRaises(TypeError):
+            simple_dto = SimpleDTO2.from_json(json_string)
+
+        json_string = '{"city": [{"country": 1}]}'
+
+        with self.assertRaises(TypeError):
+            simple_dto = SimpleDTO2.from_json(json_string)
+
+
+
+

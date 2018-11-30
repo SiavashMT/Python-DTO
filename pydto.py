@@ -1,6 +1,5 @@
 import json
 import type_checker
-from typing import Union
 
 
 class DTODescriptor:

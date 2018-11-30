@@ -94,7 +94,9 @@ def _check_type_List(type_, value):
     if not isinstance(value, list):
         raise TypeError
 
-    value_type = getattr(type_, "__args__", type_.__parameters__)[0]
+    value_type = getattr(type_, "__args__", type_.__parameters__)
+    if value_type is not None:
+        value_type = value_type[0]
 
     if value_type is not None:
         for v in value:

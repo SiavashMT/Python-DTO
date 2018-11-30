@@ -4,7 +4,7 @@ from typing import Optional, Dict, List
 from datetime import datetime
 
 
-class TestDataUtil(TestCase):
+class TestDTO(TestCase):
     def test_dto_simple_class(self):
         class SimpleDTO(DTO):
             attribute = int,
@@ -377,7 +377,7 @@ class TestDataUtil(TestCase):
 
     def test_dto_with_optional_List_field(self):
         class SimpleDTO(DTO):
-            city = Optional[List[int]],
+            city = Optional[List],
 
         json_string = '{"city": []}'
 
@@ -389,5 +389,4 @@ class TestDataUtil(TestCase):
 
         json_string = '{"city": [1, "1"]}'
 
-        with self.assertRaises(TypeError):
-            simple_dto = SimpleDTO.from_json(json_string)
+        simple_dto = SimpleDTO.from_json(json_string)
